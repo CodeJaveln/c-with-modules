@@ -1,0 +1,105 @@
+#export open
+
+#import "types.cm"
+
+void Update(struct game_state *game_state);
+
+#export close
+
+#import "ball.cm"
+
+#include "raylib.h"
+#include "raymath.h"
+
+#include <stdio.h>
+
+#define PLAYER_SPEED 200
+
+//Ball bounces
+static void Bounce(struct game_state *gamestate, bool xAxis){
+    if(xAxis){
+        gamestate->ball.velocity.x *= -1;
+    }
+    else  {
+        gamestate->ball.velocity.y *= -1;
+    }
+}
+
+static void BallOut(struct game_state *gamestate, bool p1Won){
+    BallReset(gamestate);
+
+    if(p1Won){
+        gamestate->player1.score++;
+    }
+    else{
+        gamestate->player2.score++;
+    }
+
+    gamestate->timer.active = true;
+    gamestate->timer.time = TIME_PAUSED;
+}
+
+void Update(struct game_state *gameState){
+    float dt = GetFrameTime();
+
+    if (gameState->timer.active) {
+        gameState->timer.time -= dt;
+
+        if (gameState->timer.time <= 0.0f) {
+            gameState->timer.active = false;
+        }
+
+        return;
+    }
+
+    struct player *player1 = &gameState->player1;
+    struct player *player2 = &gameState->player2;
+    struct ball *ball = &gameState->ball;
+
+    //Player1 movement
+    player1->velocity = 0;
+    if(IsKeyDown(KEY_W)){player1->velocity -= PLAYER_SPEED * dt;}
+    if(IsKeyDown(KEY_S)){player1->velocity += PLAYER_SPEED * dt;}
+    player1->position.y += player1->velocity;
+
+    player1->position.y = Clamp(player1->position.y, 0, GetScreenHeight() - PLAYER_HEIGHT);
+
+    //Player2 movement
+    player2->velocity = 0;
+    if(IsKeyDown(KEY_UP)){player2->velocity -= PLAYER_SPEED * dt;}
+    if(IsKeyDown(KEY_DOWN)){player2->velocity += PLAYER_SPEED * dt;}
+    player2->position.y += player2->velocity;
+
+    player2->position.y = Clamp(player2->position.y, 0, GetScreenHeight() - PLAYER_HEIGHT);
+
+    //Ball movement
+    ball->position.x += ball->velocity.x * dt;
+    ball->position.y += ball->velocity.y * dt;
+
+    //Bounce when hitting ground or ceiling
+    if(ball->position.y <= 0 || ball->position.y >= GetScreenHeight() - BALL_SIZE){
+        Bounce(gameState, false);
+    }
+
+    //Ball outside left
+    if(ball->position.x < -BALL_SIZE){
+        BallOut(gameState, 0);
+    }
+
+    //Ball outside right
+    if(ball->position.x > SCREEN_WIDTH){
+        BallOut(gameState, 1);
+    }
+
+    //Bouncing on paddles
+    if(ball->position.x <= GetScreenWidth() * PLAYER_OFFSET + PLAYER_WIDTH && ball->position.x >= GetScreenWidth() * PLAYER_OFFSET && ball->position.y < player1->position.y + PLAYER_HEIGHT && ball->position.y + BALL_SIZE > player1->position.y && ball->velocity.x < 0)
+    {
+        Bounce(gameState, true);
+    }
+
+    if(ball->position.x >= GetScreenWidth() * (1 - PLAYER_OFFSET) - PLAYER_WIDTH - BALL_SIZE && ball->position.x <= GetScreenWidth() * (1 - PLAYER_OFFSET) - PLAYER_WIDTH && ball->position.y < player2->position.y + PLAYER_HEIGHT && ball->position.y + BALL_SIZE > player2->position.y && ball->velocity.x > 0)
+    {
+        Bounce(gameState, true);
+    }
+}
+

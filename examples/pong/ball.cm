@@ -1,0 +1,18 @@
+#export open
+
+#import "types.cm"
+
+void BallReset(struct game_state *gamestate);
+
+#export close
+
+#include <stdlib.h>
+
+void BallReset(struct game_state *game_state){
+    game_state->ball.position.y = (SCREEN_HEIGHT + BALL_SIZE) / 2.0f;
+    game_state->ball.position.x = (SCREEN_WIDTH + BALL_SIZE) / 2.0f;
+    game_state->ball.velocity = (Vector2){
+        .x = (rand() % 2) ? -BALL_SPEED : BALL_SPEED,
+        .y = (rand() % 2) ? -BALL_SPEED : BALL_SPEED
+    };
+}

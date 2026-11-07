@@ -1,0 +1,42 @@
+#include <stddef.h>
+#include <stdlib.h>
+#include <time.h>
+
+#include "raylib.h"
+
+#import "update.cm"
+#import "render.cm"
+#import "ball.cm"
+
+int main(int argc, char **argv) {
+    (void)argc, (void)argv;
+
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hello, World!");
+
+    SetTargetFPS(60);
+
+    srand(time(NULL));
+
+    struct game_state game_state = {0};
+
+    game_state.player1.position.x = SCREEN_WIDTH * PLAYER_OFFSET;
+    game_state.player2.position.x = SCREEN_WIDTH * (1 - PLAYER_OFFSET) - PLAYER_WIDTH;
+
+    game_state.player1.position.y = (SCREEN_HEIGHT + PLAYER_HEIGHT) / 2.0f;
+    game_state.player2.position.y = game_state.player1.position.y;
+
+    game_state.timer.active = true;
+    game_state.timer.time = 2.0f;
+
+    BallReset(&game_state);
+
+    while (!WindowShouldClose()) {
+        Update(&game_state);
+        
+        Render(&game_state);
+    }
+
+    CloseWindow();
+
+    return EXIT_SUCCESS;
+}

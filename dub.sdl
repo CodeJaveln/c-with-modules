@@ -1,0 +1,5 @@
+name "cm"
+description "C with freaking modules"
+authors "Simon Malmqvist"
+copyright "Copyright © 2026, Simon Malmqvist"
+license "MIT"

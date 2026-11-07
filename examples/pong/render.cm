@@ -1,0 +1,30 @@
+#export open
+
+#import "types.cm"
+
+void Render(struct game_state *game_state);
+
+#export close
+
+#include <stdio.h>
+#include "raylib.h"
+
+void Render(struct game_state *game_state) {
+    BeginDrawing();
+
+    ClearBackground(BLACK);
+
+    DrawRectangle(game_state->player1.position.x, game_state->player1.position.y, PLAYER_WIDTH, PLAYER_HEIGHT, RAYWHITE);
+    DrawRectangle(game_state->player2.position.x, game_state->player2.position.y, PLAYER_WIDTH, PLAYER_HEIGHT, RAYWHITE);
+
+    DrawRectangle(game_state->ball.position.x, game_state->ball.position.y, BALL_SIZE, BALL_SIZE, RAYWHITE);
+
+    char buf[16];
+    sprintf(buf, "%d", game_state->player1.score);
+    DrawText(buf, 100, 100, 24, RED);
+   
+    sprintf(buf, "%d", game_state->player2.score);
+    DrawText(buf, 700, 100, 24, BLUE);
+
+    EndDrawing();
+}
